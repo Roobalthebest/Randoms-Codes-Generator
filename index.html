@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Générateur de code</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #7c3aed;
+      --muted: #94a3b8;
+      --text: #e6eef8;
+      --button-bg: linear-gradient(180deg, var(--accent), #5b21b6);
+      --button-text: white;
+    }
+
+    body.light {
+      --bg: #ffffff;
+      --card: #f2f3f8;
+      --accent: #2563eb;
+      --muted: #475569;
+      --text: #0f172a;
+      --button-bg: #2563eb;
+      --button-text: white;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      padding: 24px;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 540px;
+      padding: 28px;
+      border-radius: 14px;
+      background: var(--card);
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      position: relative;
+    }
+
+    .theme-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: 1px solid var(--muted);
+      color: var(--text);
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .theme-btn:hover {
+      background: var(--muted);
+      color: var(--card);
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .code-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.04);
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    input#code {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font-weight: 700;
+      font-size: 16px;
+      outline: none;
+      width: 100%;
+    }
+
+    button.btn {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 0;
+      background: var(--button-bg);
+      color: var(--button-text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    button.btn:active { transform: scale(0.95); }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <button class="theme-btn" id="themeToggle">Clair</button>
+    <h1 id="generateTitle">Générer un code</h1>
+
+    <div class="row">
+      <div class="code-input" role="group" aria-label="Code généré">
+        <input id="code" readonly aria-readonly="true" value="" />
+      </div>
+      <button class="btn" id="copyBtn" title="Copier le code">Copier</button>
+    </div>
+
+    <p class="hint">
+      Le code contient exactement 7 lettres MAJUSCULES et 7 chiffres, mélangés aléatoirement.
+    </p>
+  </main>
+
+  <script>
+    function randomUpper(){
+      const letters = [];
+      for(let i=0;i<7;i++) letters.push(String.fromCharCode(65 + Math.floor(Math.random()*26)));
+      return letters;
+    }
+    function randomDigits(){
+      const digits = [];
+      for(let i=0;i<7;i++) digits.push(String.fromCharCode(48 + Math.floor(Math.random()*10)));
+      return digits;
+    }
+    function shuffleArray(a){
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    function generateCode(){
+      const parts = randomUpper().concat(randomDigits());
+      shuffleArray(parts);
+      return parts.join('');
+    }
+
+    const codeInput = document.getElementById('code');
+    const copyBtn = document.getElementById('copyBtn');
+    const title = document.getElementById('generateTitle');
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    function updateCode(){
+      codeInput.value = generateCode();
+    }
+
+    async function copyCode(){
+      try {
+        await navigator.clipboard.writeText(codeInput.value);
+        const old = copyBtn.textContent;
+        copyBtn.textContent = 'Copié !';
+        setTimeout(()=> copyBtn.textContent = old, 1400);
+      } catch (err) {
+        alert('Échec de la copie : ' + err.message);
+      }
+    }
+
+    function toggleTheme(){
+      body.classList.toggle('light');
+      themeToggle.textContent = body.classList.contains('light') ? 'Sombre' : 'Clair';
+    }
+
+    title.addEventListener('click', updateCode);
+    copyBtn.addEventListener('click', copyCode);
+    themeToggle.addEventListener('click', toggleTheme);
+
+    updateCode();
+  </script>
+</body>
+</html>
